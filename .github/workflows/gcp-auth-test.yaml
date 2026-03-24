@@ -1,0 +1,34 @@
+name: "Pull Request Workflow"
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+defaults:
+  run:
+    shell: "bash"
+
+jobs:
+  build:
+    # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          create_credentials_file: true
+          workload_identity_provider: "principal://iam.googleapis.com/projects/850812025847/locations/global/workloadIdentityPools/github-actions-iac/subject/SUBJECT_ATTRIBUTE_VALUE"
+          service_account: "github-actions-iac@project-c0cea0c3-cf00-4dc8-b6d.iam.gserviceaccount.com"
