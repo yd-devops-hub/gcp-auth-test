@@ -1,4 +1,4 @@
-name: "Pull Request Workflow"
+name: "GCP Auth Test Workflow"
 
 on:
   pull_request:
@@ -28,7 +28,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - id: "auth"
+      - id: "auth-on-pr"
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          create_credentials_file: true
+          workload_identity_provider: "projects/850812025847/locations/global/workloadIdentityPools/yashrajdighe-iac-readonly/providers/read-access"
+          service_account: "yashrajdighe-iac-readonly@project-c0cea0c3-cf00-4dc8-b6d.iam.gserviceaccount.com"
+      - id: "auth-on-push"
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v3"
         with:
