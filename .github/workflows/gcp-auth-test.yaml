@@ -58,3 +58,4 @@ jobs:
           gcloud resource-manager folders list --organization="$ORG_ID" --format="table(name, displayName, lifecycleState)"
           echo "=== Projects ==="
           gcloud projects list --format="table(projectId, name, parent.id, parent.type)"
+
