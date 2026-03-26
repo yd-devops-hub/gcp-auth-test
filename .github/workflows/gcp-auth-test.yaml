@@ -44,3 +44,14 @@ jobs:
           create_credentials_file: true
           workload_identity_provider: "projects/850812025847/locations/global/workloadIdentityPools/yashrajdighe-iac/providers/write-access"
           service_account: "yashrajdighe-iac@project-c0cea0c3-cf00-4dc8-b6d.iam.gserviceaccount.com"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "List all folders in the org"
+        run: |
+          gcloud resource-manager folders list --organization="$(gcloud organizations list --format='value(name)')"
+
+      - name: "List all projects in the org"
+        run: |
+          gcloud projects list --filter="parent.type=organization" --format="table(projectId, name, parent.id)"
