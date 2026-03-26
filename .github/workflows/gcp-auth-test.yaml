@@ -1,0 +1,46 @@
+name: "GCP Auth Test Workflow"
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+defaults:
+  run:
+    shell: "bash"
+
+jobs:
+  build:
+    # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: "auth-on-pr"
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          create_credentials_file: true
+          workload_identity_provider: "projects/850812025847/locations/global/workloadIdentityPools/yashrajdighe-iac-readonly/providers/read-access"
+          service_account: "yashrajdighe-iac-readonly@project-c0cea0c3-cf00-4dc8-b6d.iam.gserviceaccount.com"
+      - id: "auth-on-push"
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v3"
+        with:
+          create_credentials_file: true
+          workload_identity_provider: "projects/850812025847/locations/global/workloadIdentityPools/yashrajdighe-iac/providers/write-access"
+          service_account: "yashrajdighe-iac@project-c0cea0c3-cf00-4dc8-b6d.iam.gserviceaccount.com"
