@@ -58,7 +58,7 @@ jobs:
           gcloud projects list --format="table(projectId, name, parent.id, parent.type)"
 
       - name: "Create folder test-folder-iac"
-        # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           ORG_ID=$(gcloud organizations list --format='value(name)' | head -1)
           gcloud resource-manager folders create \
