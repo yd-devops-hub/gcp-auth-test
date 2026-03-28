@@ -59,8 +59,43 @@ jobs:
 
       - name: "Create folder test-folder-iac"
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: "create-folder"
         run: |
           ORG_ID=$(gcloud organizations list --format='value(name)' | head -1)
-          gcloud resource-manager folders create \
-            --display-name="test-folder-iac" \
-            --organization="$ORG_ID"
+          FOLDER_ID=$(gcloud resource-manager folders list \
+            --organization="$ORG_ID" \
+            --filter="displayName=test-folder-iac" \
+            --format="value(name)" | head -1)
+
+          if [[ -n "$FOLDER_ID" ]]; then
+            echo "Folder 'test-folder-iac' already exists: $FOLDER_ID"
+          else
+            echo "Creating folder 'test-folder-iac'..."
+            FOLDER_ID=$(gcloud resource-manager folders create \
+              --display-name="test-folder-iac" \
+              --organization="$ORG_ID" \
+              --format="value(name)")
+            echo "Folder created: $FOLDER_ID"
+          fi
+
+          echo "folder_id=$FOLDER_ID" >> "$GITHUB_OUTPUT"
+
+      - name: "Create project my-test-project in test-folder-iac"
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          FOLDER_ID=${{ steps.create-folder.outputs.folder_id }}
+          FOLDER_NUM=${FOLDER_ID#folders/}
+
+          EXISTING=$(gcloud projects list \
+            --filter="projectId=my-test-project" \
+            --format="value(projectId)" | head -1)
+
+          if [[ -n "$EXISTING" ]]; then
+            echo "Project 'my-test-project' already exists, skipping creation."
+          else
+            echo "Creating project 'my-test-project' in folder $FOLDER_NUM..."
+            gcloud projects create my-test-project \
+              --folder="$FOLDER_NUM" \
+              --name="my-test-project"
+            echo "Project created."
+          fi
